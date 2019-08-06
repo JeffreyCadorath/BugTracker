@@ -27,17 +27,16 @@ namespace August6thExercise.Controllers
         public ActionResult AddToRole()
         {
             var Users = userManager.Users.ToList();
-            var allRoles = rolesManger.Roles.ToList();
-            ViewBag.RoleId = new SelectList(allRoles, "Id", "Name");
+            var allRoles = rolesManger.Roles.Select(x => x.Name).Distinct().ToList();
+            ViewBag.RoleName = new SelectList(allRoles);
             ViewBag.UserId = new SelectList(Users, "Id", "UserName");
             return View();
         }
 
         [HttpPost]
-        public ActionResult AddToRole(string RoleId, string UserId)
+        public ActionResult AddToRole(string RoleName, string UserId)
         {
-            var Role = rolesManger.FindById(RoleId);
-            userManager.AddToRole(UserId, Role.Name);
+            userManager.AddToRole(UserId, RoleName);
             return RedirectToAction("Index");
         }
 

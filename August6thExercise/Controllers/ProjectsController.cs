@@ -7,17 +7,41 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using August6thExercise.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace August6thExercise.Controllers
 {
     public class ProjectsController : Controller
     {
+        private RoleManager<IdentityRole> rolesManger;
+        private UserManager<IdentityUser> userManager;
+
+        public ProjectsController()
+        {
+            rolesManger = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>());
+            userManager = new UserManager<IdentityUser>(new UserStore<IdentityUser>());
+        }
+
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Projects
+        [Authorize(Roles = "Admin, ProjectManager, Developer, Submitter")]
         public ActionResult Index()
         {
-            return View(db.Projects.ToList());
+            //Displaying The List Of Projects For Each Indvidual User 
+            if (User.IsInRole("Admin") || User.IsInRole("Project Manager"))
+            {
+                return View(db.Projects.ToList());
+            }
+            else
+            {
+                var userId = User.Identity.GetUserId();
+                var user = db.Users.Find(userId);
+                var assignedProjects = user.Projects.ToList();
+                return View(assignedProjects);
+            }
+            
         }
 
         // GET: Projects/Details/5
@@ -36,6 +60,7 @@ namespace August6thExercise.Controllers
         }
 
         // GET: Projects/Create
+        [Authorize(Roles = "Admin, Project Manager")]
         public ActionResult Create()
         {
             return View();
@@ -59,6 +84,7 @@ namespace August6thExercise.Controllers
         }
 
         // GET: Projects/Edit/5
+        [Authorize(Roles = "Admin, Project Manager")]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -122,6 +148,26 @@ namespace August6thExercise.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+            
+        [Authorize(Roles = "Admin, Project Manager")]
+        public ActionResult AssignProject()
+        {
+            var Users = userManager.Users.ToList();
+            var allProjects = db.Projects.ToList();
+            ViewBag.projectId = new SelectList(allProjects, "Id", "ProjectPlan");
+            ViewBag.UserId = new SelectList(Users, "Id", "UserName");
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult AssignProject(int projectId, string UserId)
+        {
+            var user = db.Users.Find(UserId);
+            var project = db.Projects.Find(projectId);
+           user.Projects.Add(project);
+            db.SaveChanges();
+            return RedirectToAction("Index");
         }
     }
 }

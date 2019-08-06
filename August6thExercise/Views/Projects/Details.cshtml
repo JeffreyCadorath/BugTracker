@@ -33,7 +33,16 @@
         <dd>
             @Html.DisplayFor(model => model.DueDate)
         </dd>
+        @foreach (var item in Model.ApplicationUsers)
+        {
+            <dt>
+                @Html.DisplayNameFor(model => item.UserName)
+            </dt>
 
+            <dd>
+                @Html.DisplayFor(model => item.UserName)
+            </dd>
+        }
     </dl>
 </div>
 <p>
