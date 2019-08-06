@@ -17,6 +17,7 @@ namespace August6thExercise.Migrations
         protected override void Seed(August6thExercise.Models.ApplicationDbContext context)
         {
 
+            //or var RoleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
             if(!context.Roles.Any(x => x.Name == "Admin"))
             {
                 var store = new RoleStore<IdentityRole>(context);

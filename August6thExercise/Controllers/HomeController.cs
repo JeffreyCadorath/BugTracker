@@ -27,18 +27,19 @@ namespace August6thExercise.Controllers
         public ActionResult AddToRole()
         {
             var Users = userManager.Users.ToList();
-            var allRoles = rolesManger.Roles.Select(x => x.Name).Distinct().ToList();
-            ViewBag.Roles = new SelectList(allRoles);
-            ViewBag.Users = new SelectList(Users);
+            var allRoles = rolesManger.Roles.ToList();
+            ViewBag.RoleId = new SelectList(allRoles, "Id", "Name");
+            ViewBag.UserId = new SelectList(Users, "Id", "UserName");
             return View();
         }
-        [HttpPost]
-        [Authorize(Roles ="Admin")]
 
-        //public ActionResult AddToRole()
-        //{
-            
-        //}
+        [HttpPost]
+        public ActionResult AddToRole(string RoleId, string UserId)
+        {
+            var Role = rolesManger.FindById(RoleId);
+            userManager.AddToRole(UserId, Role.Name);
+            return RedirectToAction("Index");
+        }
 
         public ActionResult About()
         {
