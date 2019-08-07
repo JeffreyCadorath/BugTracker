@@ -1,0 +1,15 @@
+﻿@model List<August6thExercise.Models.ApplicationUser>
+@{
+    ViewBag.Title = "DisplayAllAdmins";
+}
+
+<h2>Display All Admins</h2>
+<ul>
+    @foreach (var item in Model)
+    {
+    <li>
+        @item.UserName
+    </li>
+    }
+</ul>
+

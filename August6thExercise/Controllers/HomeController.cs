@@ -5,18 +5,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using August6thExercise.Models;
 
 namespace August6thExercise.Controllers
 {
     public class HomeController : Controller
     {
+        ApplicationDbContext db = new ApplicationDbContext();
+
         private RoleManager<IdentityRole> rolesManger;
         private UserManager<IdentityUser> userManager;
+        UserManagement manager;
 
         public HomeController()
         {
             rolesManger = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>());
             userManager = new UserManager<IdentityUser>(new UserStore<IdentityUser>());
+            manager = new UserManagement(db);
         }
         public ActionResult Index()
         {
@@ -39,6 +44,11 @@ namespace August6thExercise.Controllers
             userManager.AddToRole(UserId, RoleName);
             return RedirectToAction("Index");
         }
+        public ActionResult DisplayAllAdmins()
+        {
+            var allAdmins = manager.usersInRole("Admin");
+            return View(allAdmins);
+        }
 
         public ActionResult About()
         {
@@ -53,5 +63,7 @@ namespace August6thExercise.Controllers
 
             return View();
         }
+
+        
     }
 }
