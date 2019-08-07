@@ -1,0 +1,12 @@
+﻿
+@{
+    ViewBag.Title = "AssignToProject";
+}
+
+<h2>Assign To Project</h2>
+@using (Html.BeginForm())
+{
+    @Html.DropDownList("UserId")
+    @Html.DropDownList("projectId")
+    <input type="submit" value="Sennnnd it" />
+}

@@ -16,15 +16,17 @@ namespace August6thExercise.Controllers
     {
         private RoleManager<IdentityRole> rolesManger;
         private UserManager<IdentityUser> userManager;
+        ProjectHelper ph;
 
         public ProjectsController()
         {
             rolesManger = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>());
             userManager = new UserManager<IdentityUser>(new UserStore<IdentityUser>());
+            ph = new ProjectHelper(db);
         }
 
         private ApplicationDbContext db = new ApplicationDbContext();
-
+        
         // GET: Projects
         [Authorize(Roles = "Admin, ProjectManager, Developer, Submitter")]
         public ActionResult Index()
@@ -165,9 +167,59 @@ namespace August6thExercise.Controllers
         {
             var user = db.Users.Find(UserId);
             var project = db.Projects.Find(projectId);
-           user.Projects.Add(project);
+            user.Projects.Add(project);
             db.SaveChanges();
+            return View();
+        }
+
+        public ActionResult EmptyProjects()
+        {
+            var empty = ph.emptyProject();
+            return View(empty);
+        }
+
+        public ActionResult isUserOnProject(string userId, int projectId)
+        {
+            bool project = ph.isUserOnProject(userId, projectId);
+            ViewBag.project = project;
+            return View();
+        }
+        
+        public ActionResult GetUserProjects()
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = User.Identity.GetUserId();
+                var project = ph.GetUserProjects(userId);
+                return View(project);
+            }
+            else
+            {
+                ViewBag.Message = "Please Login";
+                return View();
+            }
+        }
+        public ActionResult AssignToProject()
+        {
+            var Users = userManager.Users.ToList();
+            var allProjects = db.Projects.ToList();
+            ViewBag.projectId = new SelectList(allProjects, "Id", "ProjectPlan");
+            ViewBag.UserId = new SelectList(Users, "Id", "UserName");
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult AssignToProject(string userId, int projectId)
+        {
+            var user = db.Users.Find(userId);
+            var project = db.Projects.Find(projectId);
+            ph.CheckUserId(user.Id);
+            if(!ph.isUserOnProject(userId, projectId))
+            {
+                ph.assignToProject(userId, projectId);
+            }
             return RedirectToAction("Index");
         }
+
     }
 }
